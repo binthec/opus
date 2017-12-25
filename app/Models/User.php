@@ -37,7 +37,7 @@ class User extends Authenticatable
     const LOGIN_RULES = [
         'email'     => 'required|email',
         'password'  => 'required',
-        'team_name' => 'required|exists:teams,name',
+        'team_id' => 'required',
     ];
 
     /**
@@ -182,7 +182,7 @@ class User extends Authenticatable
     {
         $user = $this->where('slug', $userSlug)->first();
 
-        if ($user) {
+        if($user) {
             return $user;
         }
 
@@ -271,12 +271,12 @@ class User extends Authenticatable
         $user = $this
             ->join('user_teams', 'users.id', '=', 'user_teams.user_id')
             ->join('teams', 'user_teams.team_id', '=', 'teams.id')
-            ->where('teams.name', '=', $data['team_name'])
+            ->where('teams.id', '=', $data['team_id'])
             ->where('users.email', '=', $data['email'])
             ->select('users.*', 'teams.slug as team_slug')
             ->first();
 
-        if ($user && Hash::check($data['password'], $user->password)) {
+        if($user && Hash::check($data['password'], $user->password)) {
             return $user;
         }
 
@@ -298,7 +298,7 @@ class User extends Authenticatable
         foreach ($roles as $role) {
             foreach ($role->permissions as $permission) {
                 foreach ($routePermissions as $routePer) {
-                    if ($permission->name === $routePer) {
+                    if($permission->name === $routePer) {
                         return true;
                     }
                 }

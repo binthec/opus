@@ -8,7 +8,6 @@ use Validator;
 use App\Models\Role;
 use App\Models\Team;
 use App\Models\Invite;
-use Laravel\Dusk\DuskServiceProvider;
 use App\Http\Validators\HashValidator;
 use Illuminate\Support\ServiceProvider;
 
@@ -33,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
                     },
                 ])->first();
 
-            if (!$team || $team->members->count() > 0) {
+            if(!$team || $team->members->count() > 0) {
                 return false;
             }
 
@@ -41,14 +40,14 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Validator::extend('is_email_exists_in_team', function ($attribute, $email, $id, $validator) {
-            $team = Team::where('name', Request::get('team_name'))
+            $team = Team::where('id', Request::get('team_id'))
                 ->with([
                     'members' => function ($query) use ($email) {
                         $query->where('email', $email);
                     },
                 ])->first();
 
-            if (!$team || $team->members->count() === 0) {
+            if(!$team || $team->members->count() === 0) {
                 return false;
             }
 
@@ -56,11 +55,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Validator::extend('team_has_role', function ($attribute, $role, $id, $validator) {
-            if (Request::isMethod('patch') === false) {
+            if(Request::isMethod('patch') === false) {
                 $team = Auth::user()->getTeam();
                 $role = Role::where('name', $role)->where('team_id', $team->id)->first();
 
-                if (!is_null($role)) {
+                if(!is_null($role)) {
                     return false;
                 }
 
@@ -75,7 +74,7 @@ class AppServiceProvider extends ServiceProvider
 
             $invited = Invite::where('email', Request::get('email'))->where('team_id', $team->id)->get();
 
-            if ($invited->count() > 0) {
+            if($invited->count() > 0) {
                 return false;
             }
 
@@ -91,12 +90,14 @@ class AppServiceProvider extends ServiceProvider
                     },
                 ])->first();
 
-            if (!$team || $team->members->count() > 0) {
+            if(!$team || $team->members->count() > 0) {
                 return false;
             }
 
             return true;
         });
+
+
     }
 
     /**
@@ -106,5 +107,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        //
     }
 }

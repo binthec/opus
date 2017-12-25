@@ -11,6 +11,8 @@ class BaseNotification extends Notification
 {
     use Queueable;
 
+    protected $channel = '#opus-notifications';
+
     protected $from = 'opus';
 
     public function via($notifiable)

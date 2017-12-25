@@ -57,13 +57,11 @@ class Like extends Model
     public function getUserLikeWikis($userId)
     {
         return $this
-            ->join('wiki', function ($join) {
-                $join->on('likes.subject_id', '=', 'wiki.id')
-                     ->whereNull('wiki.deleted_at');
-            })
-            ->where('likes.user_id', $userId)
-            ->where('likes.subject_type', Wiki::class)
+            ->where('user_id', $userId)
+            ->where('subject_type', Wiki::class)
             ->with(['subject'])
+            ->limit(7)
+            ->latest()
             ->get();
     }
 }

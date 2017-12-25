@@ -36,7 +36,7 @@
                                                 </li>
                                                 @if($role->slug !== 'admins') 
                                                     <li>
-                                                        <a href="{{ route('roles.delete', [$team->slug, $role->slug]) }}" data-method="delete" data-confirm="Are you sure?"><i class="fa fa-trash-o fa-fw" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
+                                                        <a href="{{ route('roles.delete', [$team->slug, $role->slug]) }}" data-method="delete" data-confirm="@lang('message.AreYouSure')"><i class="fa fa-trash-o fa-fw" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
                                                     </li>
                                                 @endif
                                             </ul>

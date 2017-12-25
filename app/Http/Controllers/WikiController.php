@@ -22,362 +22,366 @@ use App\Helpers\HtmlToDocHelper;
  */
 class WikiController extends Controller
 {
-    /**
-     * @var \App\Models\Wiki
-     */
-    private $wiki;
 
-    /**
-     * @var \Illuminate\Http\Request
-     */
-    private $request;
+	/**
+	 * @var \App\Models\Wiki
+	 */
+	private $wiki;
 
-    /**
-     * @var \App\Models\Space
-     */
-    private $space;
+	/**
+	 * @var \Illuminate\Http\Request
+	 */
+	private $request;
 
-    /**
-     * @var \App\Models\Tag
-     */
-    private $tag;
+	/**
+	 * @var \App\Models\Space
+	 */
+	private $space;
 
-    /**
-     * @var \App\Models\ReadList
-     */
-    private $readList;
+	/**
+	 * @var \App\Models\Tag
+	 */
+	private $tag;
 
-    /**
-     * @var \App\Models\WatchWiki
-     */
-    private $watchWiki;
+	/**
+	 * @var \App\Models\ReadList
+	 */
+	private $readList;
 
-    /**
-     * WikiController constructor.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Wiki         $wiki
-     * @param \App\Models\Space        $space
-     * @param \App\Models\Tag          $tag
-     * @param \App\Models\ReadList     $readList
-     * @param \App\Models\WatchWiki    $watchWiki
-     */
-    public function __construct(Request $request, Wiki $wiki, Space $space, Tag $tag, ReadList $readList, WatchWiki $watchWiki)
-    {
-        $this->tag       = $tag;
-        $this->wiki      = $wiki;
-        $this->space     = $space;
-        $this->request   = $request;
-        $this->readList  = $readList;
-        $this->watchWiki = $watchWiki;
-    }
+	/**
+	 * @var \App\Models\WatchWiki
+	 */
+	private $watchWiki;
 
-    /**
-     * Show a view to create a new wiki. If there is no space exists in team then
-     * user will be redirected to create space view.
-     *
-     * @param \App\Models\Team $team
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
-     */
-    public function create(Team $team)
-    {
-        $spaces = $this->space->getTeamSpaces($team->id);
+	/**
+	 * WikiController constructor.
+	 *
+	 * @param \Illuminate\Http\Request $request
+	 * @param \App\Models\Wiki         $wiki
+	 * @param \App\Models\Space        $space
+	 * @param \App\Models\Tag          $tag
+	 * @param \App\Models\ReadList     $readList
+	 * @param \App\Models\WatchWiki    $watchWiki
+	 */
+	public function __construct(Request $request, Wiki $wiki, Space $space, Tag $tag, ReadList $readList, WatchWiki $watchWiki)
+	{
+		$this->tag = $tag;
+		$this->wiki = $wiki;
+		$this->space = $space;
+		$this->request = $request;
+		$this->readList = $readList;
+		$this->watchWiki = $watchWiki;
+	}
 
-        if ($spaces->count() == 0) {
-            return redirect()->route('spaces.create', [$team->slug])->with([
-                'alert'      => 'You need to create space before creating wiki!',
-                'alert_type' => 'info',
-            ]);
-        }
+	/**
+	 * Show a view to create a new wiki. If there is no space exists in team then
+	 * user will be redirected to create space view.
+	 *
+	 * @param \App\Models\Team $team
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
+	 */
+	public function create(Team $team)
+	{
 
-        return view('wiki.create', compact('team', 'spaces'));
-    }
+		$spaces = $this->space->getTeamSpacesArr($team->id);
 
-    /**
-     * Create a new wiki.
-     *
-     * @param \App\Models\Team $team
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function store(Team $team)
-    {
-        $this->validate($this->request, Wiki::WIKI_RULES);
+		if (count($spaces) == 0) {
+			return redirect()->route('spaces.create', [$team->slug])->with([
+						'alert' => 'You need to create space before creating wiki!',
+						'alert_type' => 'info',
+			]);
+		}
 
-        $wiki = $this->wiki->saveWiki($this->request->all(), $team->id);
+		return view('wiki.create', compact('team', 'spaces'));
+	}
 
-        if (!empty($this->request->get('tags'))) {
-            $this->tag->createTags($this->request->get('tags'), Wiki::class, $wiki->id);
-        }
+	/**
+	 * Create a new wiki.
+	 *
+	 * @param \App\Models\Team $team
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function store(Team $team)
+	{
+		$this->validate($this->request, Wiki::WIKI_RULES);
 
-        return redirect()->route('wikis.show', [$team->slug, $wiki->space->slug, $wiki->slug])->with([
-            'alert'      => 'Wiki successfully created.',
-            'alert_type' => 'success',
-        ]);
-    }
+		$wiki = $this->wiki->saveWiki($this->request->all(), $team->id);
 
-    /**
-     * Show a wiki.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function show(Team $team, Space $space, Wiki $wiki)
-    {
-        $isWikiInReadList = ReadList::where('user_id', Auth::user()->id)->where('subject_id', $wiki->id)->where('subject_type', Wiki::class)->first();
+		if (!empty($this->request->get('tags'))) {
+			$this->tag->createTags($this->request->get('tags'), Wiki::class, $wiki->id);
+		}
 
-        $isUserWatchWiki = WatchWiki::where('user_id', Auth::user()->id)->where('wiki_id', $wiki->id)->first();
+		return redirect()->route('wikis.show', [$team->slug, $wiki->space->slug, $wiki->slug])->with([
+					'alert' => trans('message.SuccessfullyCreated', ['name' => 'Wiki']),
+					'alert_type' => 'success',
+		]);
+	}
 
-        $wikiTags = $this->wiki->find($wiki->id)->tags()->get();
+	/**
+	 * Show a wiki.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 */
+	public function show(Team $team, Space $space, Wiki $wiki)
+	{
+		$isWikiInReadList = ReadList::where('user_id', Auth::user()->id)->where('subject_id', $wiki->id)->where('subject_type', Wiki::class)->first();
 
-        $isUserLikeWiki = false;
-        foreach ($wiki->likes as $like) {
-            if ($like->user_id === Auth::user()->id) {
-                $isUserLikeWiki = true;
-            }
-        }
+		$isUserWatchWiki = WatchWiki::where('user_id', Auth::user()->id)->where('wiki_id', $wiki->id)->first();
 
-        return view('wiki.index', compact('pages', 'wiki', 'team', 'space', 'isUserLikeWiki', 'wikiTags', 'isUserWatchWiki', 'isWikiInReadList'));
-    }
+		$wikiTags = $this->wiki->find($wiki->id)->tags()->get();
 
-    /**
-     * Show a view to edit a wiki.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function edit(Team $team, Space $space, Wiki $wiki)
-    {
-        $wikiTags = $this->wiki->find($wiki->id)->tags()->get();
+		$isUserLikeWiki = false;
+		foreach ($wiki->likes as $like) {
+			if ($like->user_id === Auth::user()->id) {
+				$isUserLikeWiki = true;
+			}
+		}
 
-        $spaces = $this->space->getTeamSpaces($team->id);
+		return view('wiki.index', compact('pages', 'wiki', 'team', 'space', 'isUserLikeWiki', 'wikiTags', 'isUserWatchWiki', 'isWikiInReadList'));
+	}
 
-        $editWiki = true;
+	/**
+	 * Show a view to edit a wiki.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 */
+	public function edit(Team $team, Space $space, Wiki $wiki)
+	{
+		$wikiTags = $this->wiki->find($wiki->id)->tags()->get();
 
-        return view('wiki.edit', compact('wiki', 'team', 'spaces', 'space', 'editWiki', 'wikiTags'));
-    }
+		$spaces = $this->space->getTeamSpaces($team->id);
 
-    /**
-     * Update an existing wiki.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Team $team, Space $space, Wiki $wiki)
-    {
-        $this->wiki->updateWiki($wiki->id, $this->request->all());
+		$editWiki = true;
 
-        if (!empty($this->request->get('tags'))) {
-            $this->tag->updateTags($this->request->get('tags'), Wiki::class, $wiki->id);
-        }
+		return view('wiki.edit', compact('wiki', 'team', 'spaces', 'space', 'editWiki', 'wikiTags'));
+	}
 
-        return redirect()->route('wikis.show', [$team->slug, $wiki->space->slug, $wiki->slug])->with([
-            'alert'      => 'Wiki successfully updated.',
-            'alert_type' => 'success',
-        ]);
-    }
+	/**
+	 * Update an existing wiki.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function update(Team $team, Space $space, Wiki $wiki)
+	{
+		$this->wiki->updateWiki($wiki->id, $this->request->all());
 
-    /**
-     * Update the overview(name, space_id, outline) of a wiki.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function overviewUpdate(Team $team, Space $space, Wiki $wiki)
-    {
-        $this->validate($this->request, Wiki::WIKI_RULES);
+		if (!empty($this->request->get('tags'))) {
+			$this->tag->updateTags($this->request->get('tags'), Wiki::class, $wiki->id);
+		}
 
-        $this->wiki->where('id', $wiki->id)->update([
-            'name'     => $this->request->get('name'),
-            'space_id' => (int)$this->request->get('space'),
-            'outline'  => $this->request->get('outline'),
-        ]);
+		return redirect()->route('wikis.show', [$team->slug, $wiki->space->slug, $wiki->slug])->with([
+					'alert' => trans('message.SuccessfullyUpdated', ['name' => 'Wiki']),
+					'alert_type' => 'success',
+		]);
+	}
 
-        if (!empty($this->request->get('tags'))) {
-            $this->tag->updateTags($this->request->get('tags'), Wiki::class, $wiki->id);
-        }
+	/**
+	 * Update the overview(name, space_id, outline) of a wiki.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function overviewUpdate(Team $team, Space $space, Wiki $wiki)
+	{
+		$this->validate($this->request, Wiki::getValidationRules($wiki));
 
-        return redirect()->back()->with([
-            'alert'      => 'Wiki successfully updated.',
-            'alert_type' => 'success',
-        ]);
-    }
+		$this->wiki->where('id', $wiki->id)->update([
+			'name' => $this->request->get('name'),
+			'slug' => $this->request->get('slug'),
+			'space_id' => (int) $this->request->get('space'),
+			'outline' => $this->request->get('outline'),
+		]);
 
-    /**
-     * Delete a wiki.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy(Team $team, Space $space, Wiki $wiki)
-    {
-        $this->wiki->deleteWiki($wiki->id);
+		if (!empty($this->request->get('tags'))) {
+			$this->tag->updateTags($this->request->get('tags'), Wiki::class, $wiki->id);
+		}
 
-        return redirect()->route('dashboard', [$team->slug])->with([
-            'alert'      => 'Wiki successfully deleted.',
-            'alert_type' => 'success',
-        ]);
-    }
+		return redirect()->route('wikis.settings', [$team->slug, $wiki->space->slug, $this->request->get('slug')])->with([
+					'alert' => trans('message.SuccessfullyUpdated', ['name' => 'Wiki']),
+					'alert_type' => 'success',
+		]);
+	}
 
-    /**
-     * Get all wikis having a specific tag.
-     *
-     * @param \App\Models\Team $team
-     * @param \App\Models\Tag  $tag
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function getTagWikis(Team $team, Tag $tag)
-    {
-        $spaces = $this->space->getTeamSpaces($team->id);
+	/**
+	 * Delete a wiki.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function destroy(Team $team, Space $space, Wiki $wiki)
+	{
+		$this->wiki->deleteWiki($wiki->id);
 
-        $wikis = $this->tag->getTeamTagWikis($team->id, $tag->id);
+		return redirect()->route('dashboard', [$team->slug])->with([
+					'alert' => trans('message.SuccessfullyDeleted', ['name' => 'Wiki']),
+					'alert_type' => 'success',
+		]);
+	}
 
-        return view('tag.wikis', compact('team', 'wikis', 'tag', 'spaces'));
-    }
+	/**
+	 * Get all wikis having a specific tag.
+	 *
+	 * @param \App\Models\Team $team
+	 * @param \App\Models\Tag  $tag
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 */
+	public function getTagWikis(Team $team, Tag $tag)
+	{
+		$spaces = $this->space->getTeamSpaces($team->id);
 
-    /**
-     * Get the setting view of the wiki.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function setting(Team $team, Space $space, Wiki $wiki)
-    {
-        $isUserLikeWiki = self::isUserLikeWiki($wiki);
+		$wikis = $this->tag->getTeamTagWikis($team->id, $tag->id);
 
-        $wikiLastUpdated = Activity::where('subject_type', Wiki::class)->where('subject_id', $wiki->id)->orderBy('created_at', 'desc')->first()->updated_at->timezone(Auth::user()->timezone)->toDayDateTimeString();
+		return view('tag.wikis', compact('team', 'wikis', 'tag', 'spaces'));
+	}
 
-        $spaces = $this->space->getTeamSpaces($team->id);
+	/**
+	 * Get the setting view of the wiki.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 */
+	public function setting(Team $team, Space $space, Wiki $wiki)
+	{
+		$isUserLikeWiki = self::isUserLikeWiki($wiki);
 
-        $wikiTags = $this->wiki->find($wiki->id)->tags()->get();
+		$wikiLastUpdated = Activity::where('subject_type', Wiki::class)->where('subject_id', $wiki->id)->orderBy('created_at', 'desc')->first()->updated_at->timezone(Auth::user()->timezone)->toDayDateTimeString();
 
-        return view('wiki.setting.overview', compact('team', 'space', 'wiki', 'isUserLikeWiki', 'wikiLastUpdated', 'spaces', 'wikiTags'));
-    }
+		$spaces = $this->space->getTeamSpaces($team->id);
 
-    /**
-     * Check if a user liked a wiki or not.
-     *
-     * @param $wiki
-     * @return bool
-     */
-    public static function isUserLikeWiki($wiki)
-    {
-        $isLiked = false;
-        foreach ($wiki->likes as $like) {
-            if ($like->user_id === Auth::user()->id) {
-                $isLiked = true;
-            }
-        }
+		$wikiTags = $this->wiki->find($wiki->id)->tags()->get();
 
-        return $isLiked;
-    }
+		return view('wiki.setting.overview', compact('team', 'space', 'wiki', 'isUserLikeWiki', 'wikiLastUpdated', 'spaces', 'wikiTags'));
+	}
 
-    /**
-     * Generate the .pdf file of wiki.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return mixed
-     */
-    public function generatePdf(Team $team, Space $space, Wiki $wiki)
-    {
-        return Pdf::loadView('pdf.page', compact('wiki'))->setOption('header-html', view('pdf.header', compact('wiki')))->inline($wiki->name . '.pdf');
-    }
+	/**
+	 * Check if a user liked a wiki or not.
+	 *
+	 * @param $wiki
+	 * @return bool
+	 */
+	public static function isUserLikeWiki($wiki)
+	{
+		$isLiked = false;
+		foreach ($wiki->likes as $like) {
+			if ($like->user_id === Auth::user()->id) {
+				$isLiked = true;
+			}
+		}
 
-    /**
-     * Generate a .doc file of wiki.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function generateWord(Team $team, Space $space, Wiki $wiki)
-    {
-        return response()->json((new HtmlToDocHelper)->createDoc($wiki->description, $wiki->name . ".doc", true), 200);
-    }
+		return $isLiked;
+	}
 
-    /**
-     * Add wiki to watching list.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function watch(Team $team, Space $space, Wiki $wiki)
-    {
-        $this->watchWiki->watchWiki($wiki->id);
+	/**
+	 * Generate the .pdf file of wiki.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return mixed
+	 */
+	public function generatePdf(Team $team, Space $space, Wiki $wiki)
+	{
+		return Pdf::loadView('pdf.page', compact('wiki'))->setOption('header-html', view('pdf.header', compact('wiki')))->inline($wiki->name . '.pdf');
+	}
 
-        return redirect()->back()->with([
-            'alert'      => 'You are now watching this wiki.',
-            'alert_type' => 'success',
-        ]);
-    }
+	/**
+	 * Generate a .doc file of wiki.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Http\JsonResponse
+	 */
+	public function generateWord(Team $team, Space $space, Wiki $wiki)
+	{
+		return response()->json((new HtmlToDocHelper)->createDoc($wiki->description, $wiki->name . ".doc", true), 200);
+	}
 
-    /**
-     * Remove a wiki from watching list.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function stopWatch(Team $team, Space $space, Wiki $wiki)
-    {
-        $this->watchWiki->unwatchWiki($wiki->id);
+	/**
+	 * Add wiki to watching list.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function watch(Team $team, Space $space, Wiki $wiki)
+	{
+		$this->watchWiki->watchWiki($wiki->id);
 
-        return redirect()->back()->with([
-            'alert'      => 'You are now ignoring this wiki.',
-            'alert_type' => 'success',
-        ]);
-    }
+		return redirect()->back()->with([
+					'alert' => trans('message.YouAreWatchingIt', ['name' => 'Wiki']),
+					'alert_type' => 'success',
+		]);
+	}
 
-    /**
-     * Insert a wiki in read list.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function addToReadList(Team $team, Space $space, Wiki $wiki)
-    {
-        $this->readList->createSubject($wiki->id, Wiki::class);
+	/**
+	 * Remove a wiki from watching list.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function stopWatch(Team $team, Space $space, Wiki $wiki)
+	{
+		$this->watchWiki->unwatchWiki($wiki->id);
 
-        return redirect()->back()->with([
-            'alert'      => 'Wiki successfully added to read list.',
-            'alert_type' => 'success',
-        ]);
-    }
+		return redirect()->back()->with([
+					'alert' => trans('message.YouAreIgnoringIt', ['name' => 'Wiki']),
+					'alert_type' => 'success',
+		]);
+	}
 
-    /**
-     * Remove a wiki from read list.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @param \App\Models\Wiki  $wiki
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function removeFromReadList(Team $team, Space $space, Wiki $wiki)
-    {
-        $this->readList->deleteSubject($wiki->id, Wiki::class);
+	/**
+	 * Insert a wiki in read list.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function addToReadList(Team $team, Space $space, Wiki $wiki)
+	{
+		$this->readList->createSubject($wiki->id, Wiki::class);
 
-        return redirect()->back()->with([
-            'alert'      => 'Wiki successfully removed from read list.',
-            'alert_type' => 'success',
-        ]);
-    }
+		return redirect()->back()->with([
+					'alert' => trans('message.SuccessfullyAddedTo', ['name' => 'Wiki', 'to' => trans('menu.ReadList')]),
+					'alert_type' => 'success',
+		]);
+	}
+
+	/**
+	 * Remove a wiki from read list.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @param \App\Models\Wiki  $wiki
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function removeFromReadList(Team $team, Space $space, Wiki $wiki)
+	{
+		$this->readList->deleteSubject($wiki->id, Wiki::class);
+
+		return redirect()->back()->with([
+					'alert' => trans('message.SuccessfullyDeletedFrom', ['name' => 'Wiki', 'from' => trans('menu.ReadList')]),
+					'alert_type' => 'success',
+		]);
+	}
+
 }

@@ -102,7 +102,8 @@ class Tag extends Model
     public function createTags($tags, $subjectType, $subjectId)
     {
         foreach ($tags as $inputTag) {
-            if (gettype($inputTag) === 'string' && (int)$inputTag === 0) {
+
+            if(gettype($inputTag) === 'string' && (int)$inputTag === 0) {
                 $tag = $this->create([
                     'name' => $inputTag,
                 ]);
@@ -115,6 +116,7 @@ class Tag extends Model
                 'created_at'   => Carbon::now(),
                 'updated_at'   => Carbon::now(),
             ]);
+
         }
 
         return true;
@@ -133,7 +135,7 @@ class Tag extends Model
         DB::table('page_tags')->where('subject_type', $subjectType)->where('subject_id', $subjectId)->delete();
 
         foreach ($tags as $inputTag) {
-            if (gettype($inputTag) === 'string' && (int)$inputTag === 0) {
+            if(gettype($inputTag) === 'string' && (int)$inputTag === 0) {
                 $tag = $this->create([
                     'name' => $inputTag,
                 ]);
@@ -146,6 +148,7 @@ class Tag extends Model
                 'created_at'   => Carbon::now(),
                 'updated_at'   => Carbon::now(),
             ]);
+
         }
 
         return true;

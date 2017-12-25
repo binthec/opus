@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Http\ViewComposers\MenuComposer;
 use App\Http\ViewComposers\NotificationComposer;
 
 class ComposerServiceProvider extends ServiceProvider

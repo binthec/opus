@@ -88,7 +88,7 @@ class Integration extends Model
      * @param $teamId integer
      * @return static
      */
-    public function storeIntegration($data, $teamId)
+    public function storeSlackIntegration($data, $teamId)
     {
         return $this->create([
             'title'   => $data['title'],
@@ -106,27 +106,6 @@ class Integration extends Model
      */
     public function getTeamIntegration($teamId)
     {
-        return $this->where('team_id', $teamId)->with(['integrationActions'])->get();
-    }
-
-    /**
-     * Update integration.
-     *
-     * @param $id
-     * @param $data
-     * @return mixed
-     *
-     */
-    public function updateIntegration($id, $data)
-    {
-        return $this->find($id)->update([
-            'title' => $data['title'],
-            'url'   => $data['url'],
-        ]);
-    }
-
-    public function deleteIntegration($id)
-    {
-        return $this->find($id)->delete();
+        return  $this->where('team_id', $teamId)->with(['integrationActions'])->get();
     }
 }

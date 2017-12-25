@@ -1,19 +1,9 @@
-<div class="home-nav">
-	<ul class="list-unstyled list-inline">
-		<li>
-            <a href="#">Home</a>
-		</li>
-        <li>
-            <a href="#">Features</a>
-        </li>
-        <li>
-            <a href="#">About</a>
-        </li>
-        <li>
-            <a href="#">Faq</a>
-        </li>
-        <li>
-            <a href="https://github.com/zeeshanu/opus"><i class="fa fa-github-alt fa-fw"></i> Github</a>
-        </li>
-	</ul>
+<div class="navbar home-nav-con">
+	<div class="container-fluid">
+		<a href="{{ url('/') }}">
+            <div class="navbar-brand">
+                <img src="/img/logo.png" width="44" style="display: inline-block;"> <span style="font-weight: 700; font-size: 22px; color: #333; text-transform: uppercase; position: relative; top: 8px;">OPUS</span>
+            </div>
+		</a>
+	</div>
 </div>

@@ -15,132 +15,134 @@ use Illuminate\Http\Request;
  */
 class SpaceController extends Controller
 {
-    /**
-     * @var \Illuminate\Http\Request
-     */
-    private $request;
 
-    /**
-     * @var \App\Models\Team
-     */
-    private $team;
+	/**
+	 * @var \Illuminate\Http\Request
+	 */
+	private $request;
 
-    /**
-     * @var \App\Models\Space
-     */
-    private $space;
+	/**
+	 * @var \App\Models\Team
+	 */
+	private $team;
 
-    /**
-     * @var \App\Models\Wiki
-     */
-    private $wiki;
+	/**
+	 * @var \App\Models\Space
+	 */
+	private $space;
 
-    /**
-     * SpaceController constructor.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Team         $team
-     * @param \App\Models\Space        $space
-     * @param \App\Models\Wiki         $wiki
-     */
-    public function __construct(Request $request, Team $team, Space $space, Wiki $wiki)
-    {
-        $this->team    = $team;
-        $this->wiki    = $wiki;
-        $this->space   = $space;
-        $this->request = $request;
-    }
+	/**
+	 * @var \App\Models\Wiki
+	 */
+	private $wiki;
 
-    /**
-     * Show a view to create a new space.
-     *
-     * @param \App\Models\Team $team
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     *
-     */
-    public function create(Team $team)
-    {
-        return view('space.create', compact('team'));
-    }
+	/**
+	 * SpaceController constructor.
+	 *
+	 * @param \Illuminate\Http\Request $request
+	 * @param \App\Models\Team         $team
+	 * @param \App\Models\Space        $space
+	 * @param \App\Models\Wiki         $wiki
+	 */
+	public function __construct(Request $request, Team $team, Space $space, Wiki $wiki)
+	{
+		$this->team = $team;
+		$this->wiki = $wiki;
+		$this->space = $space;
+		$this->request = $request;
+	}
 
-    /**
-     * Create a new space.
-     *
-     * @param \App\Models\Team $team
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function store(Team $team)
-    {
-        $this->validate($this->request, Space::SPACE_RULES);
+	/**
+	 * Show a view to create a new space.
+	 *
+	 * @param \App\Models\Team $team
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 *
+	 */
+	public function create(Team $team)
+	{
+		return view('space.create', compact('team'));
+	}
 
-        $this->space->createSpace($this->request->all(), $team->id);
+	/**
+	 * Create a new space.
+	 *
+	 * @param \App\Models\Team $team
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function store(Team $team)
+	{
+		$this->validate($this->request, Space::SPACE_RULES);
 
-        return redirect()->route('dashboard', ['team_slug' => $team->slug])->with([
-            'alert'      => 'Space successfully created.',
-            'alert_type' => 'success',
-        ]);
-    }
+		$this->space->createSpace($this->request->all(), $team->id);
 
-    /**
-     * Delete a space.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy(Team $team, Space $space)
-    {
-        $this->space->deleteSpace($space->id);
+		return redirect()->route('dashboard', ['team_slug' => $team->slug])->with([
+					'alert' => trans('message.SuccessfullyCreated', ['name' => trans('menu.Space')]),
+					'alert_type' => 'success',
+		]);
+	}
 
-        return redirect()->back()->with([
-            'alert'      => 'Space successfully deleted.',
-            'alert_type' => 'success',
-        ]);
-    }
+	/**
+	 * Delete a space.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function destroy(Team $team, Space $space)
+	{
+		$this->space->deleteSpace($space->id);
 
-    /**
-     * Update a space.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Team $team, Space $space)
-    {
-        $this->validate($this->request, Space::SPACE_RULES);
+		return redirect()->back()->with([
+					'alert' => trans('message.SuccessfullyDeleted', ['name' => trans('menu.Space')]),
+					'alert_type' => 'success',
+		]);
+	}
 
-        $this->space->updateSpace($this->request->all(), $space->id, $team->id);
+	/**
+	 * Update a space.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function update(Team $team, Space $space)
+	{
+		$this->validate($this->request, Space::SPACE_RULES);
 
-        return redirect()->back()->with([
-            'alert'      => 'Space successfully updated.',
-            'alert_type' => 'success',
-        ]);
-    }
+		$this->space->updateSpace($this->request->all(), $space->id, $team->id);
 
-    /**
-     * Get all wikis of a space.
-     *
-     * @param \App\Models\Team  $team
-     * @param \App\Models\Space $space
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function getSpaceWikis(Team $team, Space $space)
-    {
-        $wikis = $this->wiki->getSpaceWikis($space->id, $team->id);
+		return redirect()->back()->with([
+					'alert' => trans('message.SuccessfullyUpdated', ['name' => trans('menu.Space')]),
+					'alert_type' => 'success',
+		]);
+	}
 
-        $spaces = $this->space->getTeamSpaces($team->id);
+	/**
+	 * Get all wikis of a space.
+	 *
+	 * @param \App\Models\Team  $team
+	 * @param \App\Models\Space $space
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 */
+	public function getSpaceWikis(Team $team, Space $space)
+	{
+		$wikis = $this->wiki->getSpaceWikis($space->id, $team->id);
 
-        return view('space.index', compact('team', 'space', 'spaces', 'wikis'));
-    }
+		$spaces = $this->space->getTeamSpaces($team->id);
 
-    /**
-     * Get all the spaces of a team.
-     *
-     * @param \App\Models\Team $team
-     * @return mixed
-     */
-    public function getTeamSpaces(Team $team)
-    {
-        return $this->space->getTeamSpaces($team->id);
-    }
+		return view('space.index', compact('team', 'space', 'spaces', 'wikis'));
+	}
+
+	/**
+	 * Get all the spaces of a team.
+	 *
+	 * @param \App\Models\Team $team
+	 * @return mixed
+	 */
+	public function getTeamSpaces(Team $team)
+	{
+		return $this->space->getTeamSpaces($team->id);
+	}
+
 }

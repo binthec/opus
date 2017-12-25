@@ -67,14 +67,14 @@
                                             <a href="#" style="position: relative;">
                                                 <i class="fa fa-envelope-o fa-fw" style="margin-right: 5px; position: relative; top: 1px;"></i> {{ $invitation->email }}
                                                 <div style="position: absolute; right: 10px; top: 8px; color: #c1c1c1;">
-                                                    <object><a href="{{ route('invite.destroy', [$team->slug, $invitation->code]) }}" data-method="delete" data-confirm="Are you sure?" id="remove-invitation" data-toggle="tooltip" data-placement="top" title="Remove Invitation"><i class="fa fa-trash-o fa-fw"></i></a></object>
+                                                    <object><a href="{{ route('invite.destroy', [$team->slug, $invitation->code]) }}" data-method="delete" data-confirm="@lang('message.AreYouSure')" id="remove-invitation" data-toggle="tooltip" data-placement="top" title="Remove Invitation"><i class="fa fa-trash-o fa-fw"></i></a></object>
                                                 </div>
                                             </a>
                                         </li>
                                     @endforeach
                                 </ul>
                             @else
-                                <h1 class="nothing-found side"><i class="fa fa-exclamation-triangle fa-fw icon"></i> Nothing found</h1>
+                                <h1 class="nothing-found side"><i class="fa fa-exclamation-triangle fa-fw icon"></i> @lang('message.Nothingfound')</h1>
                             @endif
                         </div>    
                     </div>

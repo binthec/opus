@@ -1,0 +1,25 @@
+body#login,
+body#reset-pass{
+    background-color: #EEF5D3 !important;
+}
+
+#markdown-area{
+    margin-top: 30px;
+    height: 400px;
+}
+
+.container{
+    position: absolute;
+    top: 50px;
+    width: 100%;
+    height: calc(100% - 62px);
+}
+
+.panel-more{
+    border-color: #ddd;
+}
+.panel-more .panel-heading{
+    color: #333;
+    background-color: #EEF5D3;
+    border-color: #ddd;
+}

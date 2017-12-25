@@ -175,7 +175,7 @@ input[type="email"], input[type="number"], input[type="password"], input[type="t
     height: 50px;
     min-height: 50px;
 	box-shadow: 0px 0px 0px black;
-    background: #fbfbfb;
+    background: #EEF5D3;
     border-radius: 0px;
     margin-bottom: 0px;
 }
@@ -228,7 +228,8 @@ h1, h2, h3, h4, h5, h6, p {
 }
 
 .aside-content {
-	margin-left: 260px;
+	/*margin-left: 260px;*/
+        margin-left: 240px;
 	margin-top: 20px;
 }
 
@@ -959,8 +960,8 @@ ul.home-nav li a:hover {
 .wiki-nav>nav>ul>li>a:hover, .wiki-nav>nav>ul>li>a:focus, .wiki-nav>nav>ul>li>a:active, .wiki-nav>nav>ul>li>a:visited {
 	background-color: #eee;
 	text-decoration: none;
-	border: 1px solid #ddd;
-	margin: -1px;
+	border: 0px solid #ddd;
+	/*margin-top: -1px;*/
 	color: #333;
 }
 
@@ -1391,67 +1392,15 @@ i.icon {
 }
 
 .home-head-btn {
-	padding: 11px 25px;
+    padding: 11px 25px;
     text-transform: uppercase;
     font-weight: 500;
+    border-width: 2px;
     border-style: solid;
-    background-color: transparent;
-    color: white;
-    font-size: 12px;
-    border: 1px solid #fff;
-    border-radius: 3px;
-    transition: all 0.1s;
+    background-color: #fff;
 }
 
 .home-head-btn:hover {
-    color: white;
-    background-color: transparent;
-	transform: scale(1.05);
-}
-
-.home-nav {
-    text-align: center;
-}
-
-.home-nav ul {
-    margin-bottom: 0;
-}
-
-.home-nav ul li {
-    padding: 0 12px;
-    line-height: 48px;
-}
-
-.home-nav ul li a {
-    font-size: 13px;
-    text-transform: uppercase;
-    font-weight: 300;
-}
-
-.home-nav ul li a:hover {
-    text-decoration: none;
-}
-
-.footer a {
-    font-weight:normal;
-    line-height: 12px;
-    text-decoration: none;
-    color: #939393;
-    display: inline-block;
-}
-
-.footer a i {
-    font-size:19px;
-}
-
-.footer a:hover {
-    color: #444;
-}
-
-.header-bg {
-    background-image: url(../img/bg.png);
-}
-
-.header-bg ul li a {
-    color: white !important;
+    background-color: #fff;
+	border-color: #333;
 }

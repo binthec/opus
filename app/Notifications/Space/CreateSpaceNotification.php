@@ -18,6 +18,7 @@ class CreateSpaceNotification extends BaseNotification
     public function toSlack()
     {
         return (new SlackMessage)
+            ->to($this->channel)
             ->from($this->from)
             ->content(':file_cabinet: <' . route('users.show', [$this->space->team->slug, $this->space->user->slug,]) . '|' . $this->space->user->first_name . ' ' . $this->space->user->last_name . '> created a new space.')
             ->attachment(function ($attachment) {
